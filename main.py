@@ -33,12 +33,14 @@ def update_stack(change_amount):
     res = requests.post(query_url, json=payload, headers=headers)
     data = res.json()
 
-    if not data['results']:
+    results = data.get("results", [])
+    
+    if not results:
         print(f"❌ 현황판에서 {NOTION_NAME}님을 찾을 수 없습니다.")
         return
 
-    page_id = data['results'][0]['id']
-    current_stack = data['results'][0]['properties']['스택']['number']
+    page_id = results[0]['id']
+    current_stack = results[0]['properties']['스택']['number']
     
     # 초기값이 비어있으면 0으로 취급
     if current_stack is None:
