@@ -8,6 +8,8 @@ GITHUB_REPOSITORY = os.getenv('GITHUB_REPOSITORY')
 NOTION_NAME = os.environ.get('NOTION_NAME')
 NOTION_TOKEN = os.environ.get('NOTION_TOKEN')
 DATABASE_ID = os.environ.get('DATABASE_ID')
+SCORE_DB_ID = os.environ.get('SCORE_DB_ID')
+
 
 headers = {
     "Authorization": f"Bearer {NOTION_TOKEN}",
@@ -15,11 +17,53 @@ headers = {
     "Notion-Version": "2022-06-28"
 }
 
+def update_stack(change_amount):
+    """
+    내 스택을 찾아 change_amount 만큼 더하거나 뺍니다.
+    """
+    query_url = f"https://api.notion.com/v1/databases/{SCORE_DB_ID}/query"
+    payload = {
+        "filter": {
+            "property": "이름", 
+            "title": {
+                "equals": NOTION_NAME
+            }
+        }
+    }
+    res = requests.post(query_url, json=payload, headers=headers)
+    data = res.json()
+
+    if not data['results']:
+        print(f"❌ 현황판에서 {NOTION_NAME}님을 찾을 수 없습니다.")
+        return
+
+    page_id = data['results'][0]['id']
+    current_stack = data['results'][0]['properties']['스택']['number']
+    
+    # 초기값이 비어있으면 0으로 취급
+    if current_stack is None:
+        current_stack = 0
+
+    # 2. 값 계산
+    new_stack = current_stack + change_amount
+
+    # 3. 업데이트 (Patch)
+    update_url = f"https://api.notion.com/v1/pages/{page_id}"
+    update_data = {
+        "properties": {
+            "스택": {
+                "number": new_stack
+            }
+        }
+    }
+    requests.patch(update_url, json=update_data, headers=headers)
+    print(f"💰 {NOTION_NAME}님의 스택 변경: {current_stack} -> {new_stack}")
+    
 def get_latest_commit():
     """
     현재 레포지토리의 가장 최근 커밋을 가져옵니다.
     """
-    # 깃허브 API를 통해 현재 레포지토리의 커밋 목록 조회
+    
     url = f"https://api.github.com/repos/{GITHUB_REPOSITORY}/commits"
     
     try:
@@ -107,11 +151,13 @@ if __name__ == "__main__":
     if commit:
         print(f"📌 발견된 커밋: {commit['message']}")
         
-        # [중요] 중복 검사 로직
+        # 중복 검사 로직
         if is_problem_exist(DATABASE_ID, commit['message'], NOTION_NAME):
             print("⚠️ 이미 등록된 문제입니다. (저장 건너뜀)")
-            # 이미 풀었지만 점수를 체크하고 싶다면 여기서 별도 로직 수행 가능
+
         else:
             send_to_notion(commit)
+            # 노션 등록 성공 후 스택 +1
+            update_stack(1)
     else: 
         print("❌ 커밋 정보를 가져오지 못했습니다.")
