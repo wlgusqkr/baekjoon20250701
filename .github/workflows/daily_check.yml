@@ -20,5 +20,5 @@ jobs:
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           SCORE_DB_ID: ${{ secrets.SCORE_DB_ID }}
-          NOTION_NAME: "본인이름" # 혹은 secrets.NOTION_NAME
+          NOTION_NAME: "박지현" # 혹은 secrets.NOTION_NAME
         run: python daily.py
