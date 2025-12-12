@@ -35,6 +35,7 @@ def update_stack(change_amount):
 
     results = data.get("results", [])
     
+    print("result", results)
     if not results:
         print(f"❌ 현황판에서 {NOTION_NAME}님을 찾을 수 없습니다.")
         return
