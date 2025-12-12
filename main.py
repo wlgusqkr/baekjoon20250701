@@ -33,9 +33,12 @@ def update_stack(change_amount):
     res = requests.post(query_url, json=payload, headers=headers)
     data = res.json()
 
+    print("result", results)
+    
     results = data.get("results", [])
     
     print("result", results)
+    
     if not results:
         print(f"❌ 현황판에서 {NOTION_NAME}님을 찾을 수 없습니다.")
         return
@@ -164,3 +167,6 @@ if __name__ == "__main__":
             update_stack(1)
     else: 
         print("❌ 커밋 정보를 가져오지 못했습니다.")
+        
+        
+        
