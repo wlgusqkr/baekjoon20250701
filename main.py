@@ -33,7 +33,7 @@ def update_stack(change_amount):
     res = requests.post(query_url, json=payload, headers=headers)
     data = res.json()
 
-    print("result", results)
+    print("result", res)
     
     results = data.get("results", [])
     
