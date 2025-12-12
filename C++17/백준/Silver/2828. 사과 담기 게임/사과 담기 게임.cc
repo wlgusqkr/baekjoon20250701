@@ -22,5 +22,5 @@ int main(int argc, const char * argv[]) {
         }
         result += chai;
     }
-    cout << result << endl;
+    cout << result << '\n';
 }
