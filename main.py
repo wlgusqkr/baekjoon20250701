@@ -108,7 +108,7 @@ if __name__ == "__main__":
         print(f"📌 발견된 커밋: {commit['message']}")
         
         # [중요] 중복 검사 로직
-        if is_problem_exist(DATABASE_ID, commit['message']):
+        if is_problem_exist(DATABASE_ID, commit['message'], NOTION_NAME):
             print("⚠️ 이미 등록된 문제입니다. (저장 건너뜀)")
             # 이미 풀었지만 점수를 체크하고 싶다면 여기서 별도 로직 수행 가능
         else:
