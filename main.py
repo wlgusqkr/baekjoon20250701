@@ -66,11 +66,54 @@ def send_to_notion(commit_data):
     else:
         print(f"❌ 노션 전송 실패: {res.text}")
 
+def is_problem_exist(database_id, commit_message, user_name):
+    """
+    '나(user_name)'의 기록 중에 이미 같은 제목(메시지)의 문제가 있는지 확인합니다.
+    (다른 사람이 푼 건 무시합니다)
+    """
+    url = f"https://api.notion.com/v1/databases/{database_id}/query"
+    
+    # "문제이름"이 같고(AND) "푼 사람"도 나인 경우만 검색
+    payload = {
+        "filter": {
+            "and": [
+                {
+                    "property": "문제이름", 
+                    "title": {
+                        "equals": commit_message
+                    }
+                },
+                {
+                    "property": "푼 사람",
+                    "select": {
+                        "equals": user_name
+                    }
+                }
+            ]
+        }
+    }
+    
+    res = requests.post(url, json=payload, headers=headers)
+    data = res.json()
+    
+    # 내 기록 중에 같은 문제가 있으면 True 반환
+    return len(data.get("results", [])) > 0
+  
 if __name__ == "__main__":
     print(f"🚀 {NOTION_NAME}님의 {GITHUB_REPOSITORY} 레포지토리 확인 중...")
     
     commit = get_latest_commit()
     
+    if commit:
+        print(f"📌 발견된 커밋: {commit['message']}")
+        
+        # [중요] 중복 검사 로직
+        if is_problem_exist(DATABASE_ID, commit['message']):
+            print("⚠️ 이미 등록된 문제입니다. (저장 건너뜀)")
+            # 이미 풀었지만 점수를 체크하고 싶다면 여기서 별도 로직 수행 가능
+        else:
+            send_to_notion(commit)
+            
     if commit:
         # 백준허브가 올리는 커밋인지 확인 
         print(f"📌 발견된 커밋: {commit['message']}")
