@@ -92,6 +92,8 @@ def send_to_notion(commit_data):
     # 오늘 날짜
     today_str = datetime.datetime.now().strftime("%Y-%m-%d")
 
+    print("📝 노션에 문제 등록 중...", today_str)
+    
     data = {
         "parent": {"database_id": DATABASE_ID},
         "properties": {
