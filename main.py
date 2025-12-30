@@ -2,6 +2,8 @@ import requests
 import datetime
 import os
 
+from datetime import timezone, timedelta
+
 
 # Github Action이 실행될 때 자동으로 제공해주는 환경변수 (예: 'my-id/algorithm-repo')
 GITHUB_REPOSITORY = os.getenv('GITHUB_REPOSITORY') 
@@ -88,9 +90,14 @@ def get_latest_commit():
         print(f"❌ Error: {e}")
         return None
 
+def utc_to_kst_date(iso_str):
+    dt_utc = datetime.datetime.fromisoformat(iso_str.replace('Z', '+00:00'))
+    kst = dt_utc.astimezone(timezone(timedelta(hours=9)))
+    return kst.strftime('%Y-%m-%d')
+
 def send_to_notion(commit_data):
-    # 오늘 날짜
-    today_str = datetime.datetime.now().strftime("%Y-%m-%d")
+    # 커밋 날짜(UTC)를 KST로 변환
+    kst_date = utc_to_kst_date(commit_data['date'])
 
     data = {
         "parent": {"database_id": DATABASE_ID},
@@ -102,14 +109,13 @@ def send_to_notion(commit_data):
                 "select": {"name": NOTION_NAME}
             },
             "날짜": {
-                "date": {"start": today_str}
+                "date": {"start": kst_date}
             },
             "링크": {
                 "url": commit_data['link']
             }
         }
     }
-    
     res = requests.post("https://api.notion.com/v1/pages", headers=headers, json=data)
     if res.status_code == 200:
         print(f"✅ {NOTION_NAME}님 노션 등록 완료!")
