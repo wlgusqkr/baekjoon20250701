@@ -1,42 +1,31 @@
 #include <bits/stdc++.h>
 using namespace std;
-
-int N, K, alpha = 26, cnt, res;
-
-int arr[52];
-
-void combi(int start, vector<int> &vec) {
-    if(vec.size() == K) {
-        int tmp = 0; cnt = 0;
-        for(int j : vec) {
-            tmp |= (1 << (int)j);
-        }
-        for(int j = 0; j < N; j++) {
-            if((tmp & arr[j]) == arr[j]) cnt++;
-        }
-        res = max(cnt, res);
-        return;
+int n, m, words[51];
+string s; 
+int count(int mask) {
+    int cnt = 0;
+    for (int word : words) { 
+        if(word && (word & mask) == word)cnt++; 
     }
-    for(int i = start + 1; i < alpha; i++) {
-        vec.push_back(i);
-        combi(i, vec);
-        vec.pop_back();
-    }
+    return cnt;
 }
-
-int main() {
-    
-    cin >> N >> K;
-    
-    for(int i = 0 ; i < N; i++) {
-        string str;
-        cin >> str;
-        for(int j = 0; j < str.size(); j++) {
-            arr[i] |= (1 << (((int)(str[j])) - 'a'));
+int go(int index, int k, int mask) {
+    if (k < 0) return 0;
+    if (index == 26) return count(mask); 
+    int ret = go(index+1, k-1, mask | (1 << index)); 
+    if (index != 'a'-'a' && index != 'n'-'a' && index != 't'-'a' && index != 'i'-'a' && index != 'c'-'a') {
+        ret = max(ret, go(index+1, k, mask)); 
+    }
+    return ret;
+}
+int main() { 
+    cin >> n >> m; 
+    for (int i=0; i<n; i++) { 
+        cin >> s;
+        for (char str : s) {
+            words[i] |= (1 << (str - 'a'));
         }
     }
-    vector<int> tmp;
-    combi(-1, tmp);
-    
-    cout << res;
+    cout << go(0, m, 0) << '\n';
+    return 0;
 }
