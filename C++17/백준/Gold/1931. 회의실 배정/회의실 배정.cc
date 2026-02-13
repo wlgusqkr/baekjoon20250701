@@ -16,7 +16,7 @@ int main() {
     
     to = vec[0].first; from = vec[0].second; ret++;
     for(int i = 1 ; i < N; i++) {
-        if(vec[i].second < to || vec[i].first < to ) continue;
+        if(vec[i].second < to) continue;
         to = vec[i].first;
         ret++;
     }
